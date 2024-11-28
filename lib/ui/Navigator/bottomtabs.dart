@@ -19,9 +19,9 @@ class _NavigatorState extends State<BottomTabsNavigatorState> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const LibraryScreen(),
-    const MapScreen(),   
+    MapScreen(),
     const FavouritesScreen(),
-    const EditScreen(),      
+    const EditScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -32,60 +32,72 @@ class _NavigatorState extends State<BottomTabsNavigatorState> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(      
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: Container(    
-        height: 65,                         
-        width: 250, // Aquí ajustas el ancho del contenedor
-        margin: const EdgeInsets.symmetric(horizontal: 5), // Ajusta el margen si es necesario
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 8.0,
-              offset: Offset(0, -2),
-            ),
-          ],
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
+    return Scaffold(
+      body: Stack(
+        children: [
+          // El mapa como fondo
+          Positioned.fill(
+            child: _screens[_selectedIndex],
           ),
-        ),
-        child: BottomNavigationBar(          
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          selectedItemColor: const Color.fromRGBO(66, 97, 249, 1), // Color cuando está seleccionado
-          unselectedItemColor: const Color.fromRGBO(228, 226, 226, 1), // Color cuando no está seleccionado   
-          type:BottomNavigationBarType.fixed,   
-          showSelectedLabels: false,
-          showUnselectedLabels: false,
-          backgroundColor: Colors.transparent,
-          elevation:0,
-          iconSize: 30,
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(              
-              icon: Icon(Icons.home),              
-              label: '',              
+          // El BottomNavigationBar
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              height: 65,
+              margin: const EdgeInsets.symmetric(horizontal: 5),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 8.0,
+                    offset: Offset(0, -2),
+                  ),
+                ],
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(30),
+                  topRight: Radius.circular(30),
+                ),
+              ),
+              child: BottomNavigationBar(
+                currentIndex: _selectedIndex,
+                onTap: _onItemTapped,
+                selectedItemColor: const Color.fromRGBO(66, 97, 249, 1),
+                unselectedItemColor: const Color.fromRGBO(228, 226, 226, 1),
+                type: BottomNavigationBarType.fixed,
+                showSelectedLabels: false,
+                showUnselectedLabels: false,
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                iconSize: 30,
+                items: const <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.home),
+                    label: '',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.my_library_books_outlined),
+                    label: '',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.location_on_outlined),
+                    label: '',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.favorite_border),
+                    label: '',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.mode_outlined),
+                    label: '',
+                  ),
+                ],
+              ),
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.my_library_books_outlined),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.location_on_outlined),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.favorite_border),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.mode_outlined),
-              label: '',
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
