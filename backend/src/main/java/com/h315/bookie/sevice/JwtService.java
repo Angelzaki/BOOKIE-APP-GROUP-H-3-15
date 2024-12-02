@@ -18,15 +18,16 @@ public class JwtService {
 
     private final Algorithm algorithm = Algorithm.HMAC256(SECRET);
 
-    public String generateToken(String username) {
+    public String generateToken( Long id,String username, String name) {
         return JWT.create()
-                .withSubject(username)
-                .withIssuer(ISSUER)
-                .withIssuedAt(new Date())
-                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .sign(algorithm);
+                .withSubject(username) // Identificador único del usuario
+                .withClaim("id", id) // Agrega el ID del usuario
+                .withClaim("name", name) // Agrega el nombre del usuario como claim
+                .withIssuer(ISSUER) // Emisor del token
+                .withIssuedAt(new Date()) // Fecha de emisión
+                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME)) // Fecha de expiración
+                .sign(algorithm); // Firma del token
     }
-
     public boolean validateToken(String token) {
         try {
             JWTVerifier verifier = JWT.require(algorithm).withIssuer(ISSUER).build();
