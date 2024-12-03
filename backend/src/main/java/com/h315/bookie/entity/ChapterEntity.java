@@ -1,11 +1,15 @@
 package com.h315.bookie.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 @Entity
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "chapters")
-@Data
+@Builder
 public class ChapterEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,5 +32,5 @@ public class ChapterEntity {
     private Double longitud;
 
     @Column(nullable = false)
-    private Integer numberorder;
+    private Integer numberchapter;
 }

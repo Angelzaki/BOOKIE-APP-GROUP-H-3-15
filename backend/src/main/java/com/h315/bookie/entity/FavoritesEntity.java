@@ -1,11 +1,14 @@
 package com.h315.bookie.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 @Entity
 @Table(name = "favorites")
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class FavoritesEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

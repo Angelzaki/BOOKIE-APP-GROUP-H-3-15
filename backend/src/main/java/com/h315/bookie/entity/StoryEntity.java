@@ -2,14 +2,17 @@ package com.h315.bookie.entity;
 
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+
 @Entity
 @Builder
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "stories")
 public class StoryEntity {
     @Id
