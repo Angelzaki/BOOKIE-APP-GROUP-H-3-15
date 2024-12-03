@@ -2,11 +2,13 @@ package com.h315.bookie.controller;
 
 
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.net.http.HttpResponse;
 
 @Controller
+@CrossOrigin("*")
 @RequestMapping("/api/user")
 public class UserController {
 

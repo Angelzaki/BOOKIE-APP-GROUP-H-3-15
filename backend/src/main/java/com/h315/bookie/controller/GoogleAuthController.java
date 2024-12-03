@@ -17,6 +17,7 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/api/auth/google")
 public class GoogleAuthController {
 
