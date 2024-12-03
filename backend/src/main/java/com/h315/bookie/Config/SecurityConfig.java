@@ -51,7 +51,7 @@ public class SecurityConfig {
         configuration.addAllowedOrigin("*"); // Permite todas las orígenes (modifica para producción)
         configuration.addAllowedMethod("*"); // Permite todos los métodos HTTP
         configuration.addAllowedHeader("*"); // Permite todos los encabezados
-        configuration.setAllowCredentials(false); // Define si se permiten credenciales
+        configuration.setAllowCredentials(true); // Define si se permiten credenciales
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
