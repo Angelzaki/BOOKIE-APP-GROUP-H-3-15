@@ -7,8 +7,7 @@ abstract class AuthDataSource {
   Future<void>sendIdToken({required String idToken});
 }
 
-/*Aqui vamos a ejeucta nuestros enpoint especifico para poder realizar las acciones en
- en el servidor*/
+/*Aqui vamos a ejeucta nuestros enpoint especifico para poder realizar las acciones en en el servidor*/
 class AuthDataSourceImpl implements AuthDataSource {
   Api api;
 
@@ -16,6 +15,6 @@ class AuthDataSourceImpl implements AuthDataSource {
 
   @override
   Future<void> sendIdToken({required String idToken}) async{ 
-    var response = await api.post('auth/google/verify-token', {'idToken': idToken});
+    var response = await api.login('auth/google/verify-token', {'idToken': idToken});
   }  
 }

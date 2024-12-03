@@ -4,12 +4,12 @@ import 'package:provider/provider.dart';
 import 'package:bookieapp/ui/store/main_store.dart';
 import 'package:bookieapp/ui/store/auth/auth_store.dart';
 
-class Loginscreen extends StatefulWidget {
+class LoginScreen extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => LoginScreenState();
 }
 
-class LoginScreenState extends State<Loginscreen> {
+class LoginScreenState extends State<LoginScreen> {
   late AuthStore authStore;
 
   @override
@@ -28,6 +28,7 @@ class LoginScreenState extends State<Loginscreen> {
         ),
         centerTitle: true,
         backgroundColor: Color(0xFF4261F9),
+        automaticallyImplyLeading: false,
       ),
       body: Center(
         child: Observer(
@@ -37,20 +38,24 @@ class LoginScreenState extends State<Loginscreen> {
             }
 
             // Si el usuario ha iniciado sesión, muestra el botón de cerrar sesión
-            if (authStore.success) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('¡Bienvenido!'),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Llama a la acción para cerrar sesión
-                      authStore.logOut();
-                    },
-                    child: const Text('Cerrar sesión'),
-                  ),
-                ],
-              );
+            if (authStore.hasSession) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                Navigator.pushReplacementNamed(context, "/splashScreen");
+              });
+
+              // return Column(
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   children: [
+              //     const Text('¡Bienvenido!'),
+              //     ElevatedButton(
+              //       onPressed: () {
+              //         // Llama a la acción para cerrar sesión
+              //         authStore.logOut();
+              //       },
+              //       child: const Text('Cerrar sesión'),
+              //     ),
+              //   ],
+              // );
             }
 
             // Si no ha iniciado sesión, muestra el botón de inicio de sesión

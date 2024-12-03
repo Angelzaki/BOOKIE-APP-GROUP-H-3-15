@@ -22,7 +22,7 @@ class _NavigatorState extends State<BottomTabsNavigatorState> {
     const LibraryScreen(),
     const MapScreen(),   
     const FavouritesScreen(),
-    Loginscreen(),
+    const EditScreen(),
   ];
 
   void _onItemTapped(int index) {

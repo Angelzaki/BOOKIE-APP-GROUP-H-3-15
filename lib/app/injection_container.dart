@@ -2,6 +2,8 @@ import 'package:bookieapp/data/repository/auth_repository_impl.dart';
 import 'package:bookieapp/data/source/auth_data.dart';
 import 'package:bookieapp/data/source/network/api.dart';
 import 'package:bookieapp/domain/repository/auth_repository.dart';
+import 'package:bookieapp/domain/use_cases/check_login.dart';
+import 'package:bookieapp/domain/use_cases/logout_case.dart';
 import 'package:bookieapp/domain/use_cases/send_id_token.dart';
 import 'package:bookieapp/ui/store/auth/auth_store.dart';
 import 'package:bookieapp/ui/store/main_store.dart';
@@ -21,9 +23,10 @@ Future<void> init() async {
 
   // Capa de dominio
   sl.registerLazySingleton(() => SendIdToken(sl()));
-
+  sl.registerLazySingleton(() => CheckLoginStatusUseCase(sl()));
+  sl.registerLazySingleton(() => LogOutUseCase(sl()));
   // Registra las tiendas de UI
   // Asegúrate de que MainStore se registre primero porque AuthStore depende de él
   // sl.registerLazySingleton(() => MainStore());
-  sl.registerLazySingleton(() => AuthStore(main: sl(), sendTokenUseCase: sl()));
+  sl.registerLazySingleton(() => AuthStore(main: sl(), sendTokenUseCase: sl(), checkLoginStatusUseCase: sl(), logOutUseCase:sl()));
 }

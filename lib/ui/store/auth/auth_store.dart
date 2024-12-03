@@ -1,3 +1,5 @@
+import 'package:bookieapp/domain/use_cases/check_login.dart';
+import 'package:bookieapp/domain/use_cases/logout_case.dart';
 import 'package:bookieapp/ui/store/main_store.dart';
 import 'package:mobx/mobx.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -10,8 +12,11 @@ class AuthStore = _AuthStore with _$AuthStore;
 abstract class _AuthStore with Store {
   final MainStore main;
   final SendIdToken sendTokenUseCase;
+  final CheckLoginStatusUseCase checkLoginStatusUseCase;
+  final LogOutUseCase logOutUseCase;
 
-  _AuthStore({required this.main, required this.sendTokenUseCase});
+
+  _AuthStore({required this.main, required this.sendTokenUseCase, required this.checkLoginStatusUseCase, required this.logOutUseCase});
 
   @observable
   bool loading = false;
@@ -32,6 +37,7 @@ abstract class _AuthStore with Store {
         scopes: ['email', 'openid'],
       );
       // await _googleSignIn.signOut();
+      await _googleSignIn.signOut();
       final user = await _googleSignIn.signIn();
       if (user != null) {
         final GoogleSignInAuthentication auth = await user.authentication;
@@ -45,7 +51,6 @@ abstract class _AuthStore with Store {
     } catch (e) {
       success = false;
       hasSession = false;
-      print('Error al iniciar sesión con Google: $e');
     } finally {
       loading = false;
     }
@@ -57,10 +62,15 @@ abstract class _AuthStore with Store {
     try {
       final GoogleSignIn _googleSignIn = GoogleSignIn();
       await _googleSignIn.signOut();
+      await logOutUseCase();
       success = false;
       hasSession = false;
     } catch (e) {
       print('Error al cerrar sesión: $e');
     }
   }
+
+  Future<void> checkLoginStatus() async {
+    hasSession = await checkLoginStatusUseCase();
+  } 
 }

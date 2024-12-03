@@ -1,4 +1,6 @@
 import 'package:bookieapp/app/injection_container.dart';
+import 'package:bookieapp/domain/use_cases/check_login.dart';
+import 'package:bookieapp/domain/use_cases/logout_case.dart';
 import 'package:bookieapp/ui/store/auth/auth_store.dart';
 import 'package:mobx/mobx.dart';
 import '../../../domain/use_cases/send_id_token.dart'; // Importa el caso de uso
@@ -12,6 +14,6 @@ abstract class _MainStoreBase with Store {
 
   _MainStoreBase() {
     // Pasa sendTokenUseCase al inicializar authStore
-    authStore = AuthStore(main: this as MainStore, sendTokenUseCase: sl<SendIdToken>());
+    authStore = AuthStore(main: this as MainStore, sendTokenUseCase: sl<SendIdToken>(), checkLoginStatusUseCase: sl<CheckLoginStatusUseCase>(), logOutUseCase: sl<LogOutUseCase>());
   }
 }
