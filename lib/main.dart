@@ -1,10 +1,16 @@
+import 'package:bookieapp/app/app_routes.dart';
+import 'package:bookieapp/app/injection_container.dart';
+import 'package:bookieapp/ui/pages/splashscreen.dart';
+import 'package:bookieapp/ui/store/main_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:bookieapp/ui/Navigator/bottomtabs.dart';
+import 'package:provider/provider.dart';
 
-
-void main() {
-  runApp(const MyApp());
+void main() async{
+  await init();
+  // runApp(const MyApp());
+  runApp(Provider(create: (_)=>MainStore(),child:const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -22,7 +28,12 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const BottomTabsNavigatorState(),
+      // home: const BottomTabsNavigatorState(),
+      // home: MainStore().authStore.hasSession
+      //   ? const BottomTabsNavigatorState() // Si está logueado, vamos al BottomTabsNavigator
+      //   : SplashScreen(), // Si no está logueado, mostramos SplashScreen (o LoginScreen según prefieras)
+      initialRoute: "/splashScreen",
+      onGenerateRoute: RouteGenerator.generateRoute,
     );
   }
 }

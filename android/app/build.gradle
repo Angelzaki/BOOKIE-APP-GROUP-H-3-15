@@ -29,6 +29,14 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
+    signingConfigs{
+        debug{
+            keyAlias 'login-key'
+            storePassword 'Equipoh315.'
+            storeFile file('login-key.jks')
+            keyPassword 'Equipoh315.'
+        }
+    }
 
     buildTypes {
         release {
@@ -37,6 +45,9 @@ android {
             signingConfig = signingConfigs.debug
         }
     }
+    // dependencies {
+    //     implementation 'com.google.android.gms:play-services-auth:20.7.0'
+    // }
 }
 
 flutter {

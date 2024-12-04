@@ -2,6 +2,7 @@ import 'package:bookieapp/ui/pages/editscreen.dart';
 import 'package:bookieapp/ui/pages/favouritesscreen.dart';
 import 'package:bookieapp/ui/pages/homescreen.dart';
 import 'package:bookieapp/ui/pages/libraryscreen.dart';
+import 'package:bookieapp/ui/pages/loginscreen.dart';
 import 'package:bookieapp/ui/pages/mapscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,7 +22,7 @@ class _NavigatorState extends State<BottomTabsNavigatorState> {
     const LibraryScreen(),
     const MapScreen(),   
     const FavouritesScreen(),
-    const EditScreen(),      
+    const EditScreen(),
   ];
 
   void _onItemTapped(int index) {
