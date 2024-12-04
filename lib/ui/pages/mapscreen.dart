@@ -1,7 +1,13 @@
+import 'dart:async';
+import 'package:bookieapp/ui/marker/customMarker.dart';
+import 'package:bookieapp/config/providers/routesMarkers.dart';
+import 'package:bookieapp/ui/modal/openCustomModal.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart'; 
 
 class MapScreen extends StatefulWidget {
   @override
@@ -9,183 +15,284 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  final MapController _mapController = MapController();
   LatLng? _currentLocation;
-  final List<LatLng> _markers = [];
-  double _currentZoom = 13.0;
-  bool _hasUserMovedMap = false;
+  LatLng? _destination; // Agregado para almacenar el destino actual
+  GoogleMapController? _mapController;
+  List<Marker> _markers = [];
+  List<Polyline> _polylines = [];
+  int _markerIdCounter = 1;
+  StreamSubscription<Position>? _positionStreamSubscription;
 
   @override
   void initState() {
     super.initState();
     _getCurrentLocation();
-    _listenLocationUpdates();
+    _listenToLocationChanges();
   }
 
-  Future<void> _getCurrentLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, habilita los servicios de ubicación.')),
-      );
-      return;
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
+  Future _getCurrentLocation() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Permisos de ubicación denegados.')),
+          const SnackBar(
+              content: Text('Por favor, habilita los servicios de ubicación.')),
         );
         return;
       }
-    }
 
-    if (permission == LocationPermission.deniedForever) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Los permisos están denegados permanentemente.')),
-      );
-      return;
-    }
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Permisos de ubicación denegados.')),
+          );
+          return;
+        }
+      }
 
-    final position = await Geolocator.getCurrentPosition();
-    setState(() {
-      _currentLocation = LatLng(position.latitude, position.longitude);
-      _markers.clear();
-      _markers.add(_currentLocation!);
-      _mapController.move(_currentLocation!, _currentZoom);
-    });
-  }
+      if (permission == LocationPermission.deniedForever) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Los permisos están denegados permanentemente.')),
+        );
+        return;
+      }
 
-  void _listenLocationUpdates() {
-    Geolocator.getPositionStream().listen((Position position) {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
       setState(() {
         _currentLocation = LatLng(position.latitude, position.longitude);
-        _markers[0] = _currentLocation!;
-        if (!_hasUserMovedMap) {
-          _mapController.move(_currentLocation!, _mapController.camera.zoom);
-        }
       });
-    });
-  }
-
-  void _addMarkerAtCurrentLocation() {
-    if (_currentLocation != null) {
-      setState(() {
-        _markers.add(_currentLocation!);
-      });
+    } catch (e) {
+      print('Error obteniendo ubicación: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error obteniendo ubicación: $e')),
+      );
     }
   }
 
-  void _onMarkerTapped(LatLng position) {
-    _showMarkerModal(context, position);
+  void _listenToLocationChanges() {
+    _positionStreamSubscription = Geolocator.getPositionStream(
+            locationSettings:
+                const LocationSettings(accuracy: LocationAccuracy.high))
+        .listen((Position position) {
+      setState(() {
+        _currentLocation = LatLng(position.latitude, position.longitude);
+      });
+
+      // Mueve la cámara automáticamente al cambiar de posición
+      if (_mapController != null) {
+        _mapController!.animateCamera(
+          CameraUpdate.newLatLng(_currentLocation!),
+        );
+      }
+
+      // Actualiza la ruta si hay un destino seleccionado
+      if (_destination != null) {
+        _drawRoute(_destination!);
+      }
+    });
   }
 
-  void _showMarkerModal(BuildContext context, LatLng position) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Información del Marcador',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
-              Text('Latitud: ${position.latitude.toStringAsFixed(6)}'),
-              Text('Longitud: ${position.longitude.toStringAsFixed(6)}'),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text('Cerrar'),
-              ),
-            ],
-          ),
-        );
+  void _addMarker(LatLng position) async {
+    final markerId = MarkerId('marker_${_markerIdCounter++}');
+    final customIcon = await createCustomMarker('lib/ui/assets/marker1.png');
+
+    final marker = Marker(
+      markerId: markerId,
+      position: position,
+      icon: customIcon, // Usar el ícono personalizado
+      onTap: () {
+        setState(() {
+          _destination = position; // Establecer el destino actual
+        });
+        _drawRoute(position);
+        openCustomModal(context);
       },
     );
+
+    setState(() {
+      _markers.add(marker);
+    });
   }
 
-  @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    body: SizedBox.expand( // Asegura que el mapa ocupe toda la pantalla
-      child: FlutterMap(
-        mapController: _mapController,
-        options: MapOptions(
-          initialZoom: _currentZoom,
-          onPositionChanged: (position, hasGesture) {
-            if (hasGesture) {
-              setState(() {
-                _hasUserMovedMap = true;
-                _currentZoom = position.zoom;
-              });
-            }
-          },
-        ),
-        children: [
-          TileLayer(
-            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          ),
-          MarkerLayer(
-            markers: _markers.map((position) {
-              return Marker(
-                point: position,
-                width: 40,
-                height: 40,
-                child: GestureDetector(
-                  onTap: () => _onMarkerTapped(position),
-                  child: position == _currentLocation
-                      ? const Icon(
-                          Icons.location_on,
-                          color: Colors.blue,
-                          size: 35,
-                        )
-                      : const Icon(
-                          Icons.location_on,
-                          color: Colors.red,
-                          size: 30,
-                        ),
-                ),
-              );
-            }).toList(),
-          ),
-        ],
-      ),
-    ),
-    floatingActionButton: Padding(
-      padding: const EdgeInsets.only(bottom: 65.0), // Ajusta este valor según sea necesario
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            onPressed: () {
-              setState(() {
-                _hasUserMovedMap = false;
-              });
-              _getCurrentLocation();
-            },
-            child: const Icon(Icons.my_location),
-          ),
-          const SizedBox(height: 16),
-          FloatingActionButton(
-            onPressed: _addMarkerAtCurrentLocation,
-            child: const Icon(Icons.pin_drop),
-          ),
-        ],
-      ),
-    ),
-  );
+  
+  Future<void> _drawRoute(LatLng destination) async {
+  if (_currentLocation == null) return;
+
+  // Obtén la API key desde el archivo .env
+  final apiKey = dotenv.env['API_KEY'];
+  if (apiKey == null) {
+    print('API key no encontrada');
+    return;
+  }  
+
+  final url =
+      'https://maps.googleapis.com/maps/api/directions/json?origin=${_currentLocation!.latitude},${_currentLocation!.longitude}&destination=${destination.latitude},${destination.longitude}&key=$apiKey&mode=driving';
+
+  try {
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+
+      if (data['routes'].isNotEmpty) {
+        final List<LatLng> routePoints = [];
+        for (var step in data['routes'][0]['legs'][0]['steps']) {
+          final stepPolyline = step['polyline']['points'];
+          routePoints.addAll(decodePolyline(stepPolyline));
+        }
+
+        setState(() {
+          _polylines = [
+            Polyline(
+              polylineId: const PolylineId('route'),
+              points: routePoints,
+              color: Color(0xFF4261F9),
+              width: 6,
+              patterns: [PatternItem.dot, PatternItem.gap(10)],
+            ),
+          ];
+        });
+      }
+    } else {
+      print('Error en la solicitud: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error obteniendo la ruta: $e');
+  }
 }
 
+  
+
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _currentLocation == null
+          ? const Center(child: CircularProgressIndicator())
+          : GoogleMap(
+              mapType: MapType.normal,
+              initialCameraPosition: CameraPosition(
+                target: _currentLocation!,
+                zoom: 17.0,
+              ),
+              myLocationEnabled: true,
+              myLocationButtonEnabled: true,
+              onMapCreated: (controller) {
+                _mapController = controller;
+                // Centrar la cámara una vez que el mapa esté listo
+                if (_currentLocation != null) {
+                  _mapController!.animateCamera(
+                    CameraUpdate.newLatLng(_currentLocation!),
+                  );
+                }
+              },
+              markers: Set<Marker>.of(_markers),
+              polylines: Set<Polyline>.of(_polylines),
+            ),
+      floatingActionButton: Stack(
+        children: <Widget>[
+          // Botón flotante inferior
+          Positioned(
+            bottom: 130.0,
+            right: 16.0,
+            child: GestureDetector(
+              onTap: () => _addMarker(_currentLocation!),
+              child: Container(
+                width: 40, // Tamaño del círculo
+                height: 40, // Tamaño del círculo
+                decoration: BoxDecoration(
+                  color: Colors.white, // Fondo blanco para la imagen
+                  shape: BoxShape.circle, // Hace el contenedor circular
+                  border: Border.all(
+                    color: Color(0xFF4261F9), // Color del borde azul
+                    width: 1, // Grosor del borde
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(
+                      8.0), // Espaciado alrededor de la imagen
+                  child: Image.asset(
+                    'lib/ui/assets/addMarker.png', // Tu imagen personalizada
+                    width: 40, // Tamaño de la imagen dentro del botón
+                    height: 40, // Tamaño de la imagen dentro del botón
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Botón flotante superior
+          Positioned(
+            bottom:
+                180.0, // Ajusta la distancia desde el fondo según lo necesites
+            right: 16.0,
+            child: GestureDetector(
+              onTap: () {
+                // Acción para centrar en la ubicación
+                if (_currentLocation != null) {
+                  _mapController?.animateCamera(
+                    CameraUpdate.newLatLng(_currentLocation!),
+                  );
+                }
+              },
+              child: Container(
+                width: 40, // Tamaño del círculo
+                height: 40, // Tamaño del círculo
+                decoration: BoxDecoration(
+                  color: Colors.white, // Fondo blanco para el icono
+                  shape: BoxShape.circle, // Hace el contenedor circular
+                  border: Border.all(
+                    color: Color(0xFF4261F9), // Color del borde azul
+                    width: 1, // Grosor del borde
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(
+                      8.0), // Espaciado alrededor de la imagen
+                  child: Image.asset(
+                    'lib/ui/assets/myUbication.png', // Tu imagen personalizada
+                    width: 40, // Tamaño de la imagen dentro del botón
+                    height: 40, // Tamaño de la imagen dentro del botón
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom:
+                80.0, // Ajusta la distancia desde el fondo según lo necesites
+            right: 16.0,
+            child: GestureDetector(
+              onTap: () {
+                print("open modal");
+              },
+              child: Container(
+                width: 40, // Tamaño del círculo
+                height: 40, // Tamaño del círculo
+                decoration: BoxDecoration(
+                  color: Colors.white, // Fondo blanco para el icono
+                  shape: BoxShape.circle, // Hace el contenedor circular
+                  border: Border.all(
+                    color: Color(0xFF4261F9), // Color del borde azul
+                    width: 1, // Grosor del borde
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(
+                      8.0), // Espaciado alrededor de la imagen
+                  child: Image.asset(
+                    'lib/ui/assets/book.png', // Tu imagen personalizada
+                    width: 40, // Tamaño de la imagen dentro del botón
+                    height: 40, // Tamaño de la imagen dentro del botón
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
