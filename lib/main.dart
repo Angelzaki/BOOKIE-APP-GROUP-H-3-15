@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:bookieapp/ui/Navigator/bottomtabs.dart';
 
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  try {    
+    await dotenv.load(fileName: ".env");    
+  } catch (e) {
+    print("Error al cargar .env: $e");
+  }
 
-void main() {
   runApp(const MyApp());
 }
 
@@ -12,10 +20,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarIconBrightness: Brightness.dark, // Íconos de la barra de estado en color negro
-      statusBarColor: Colors.transparent, // Establecer el color de fondo de la barra de estado (opcional)
-    ));
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarIconBrightness: Brightness.dark,
+        statusBarColor: Colors.transparent,
+      ),
+    );
+
     return MaterialApp(
       title: 'Flutter Bottom Tabs',
       theme: ThemeData(
@@ -26,10 +37,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
-
