@@ -4,7 +4,10 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.h315.bookie.entity.UserEntity;
+import com.h315.bookie.repository.UserRepository;
 import com.h315.bookie.sevice.JwtService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,8 +17,12 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/api/auth/google")
 public class GoogleAuthController {
+
+    @Autowired
+    UserRepository userRepository;
 
     @Value("${google.clientId}")
     private String CLIENT_ID;
@@ -43,14 +50,24 @@ public class GoogleAuthController {
             if (idToken != null) {
                 GoogleIdToken.Payload payload = idToken.getPayload();
 
-                // Obtener el email del usuario
+                // Obtener el email del usuario y name
                 String email = payload.getEmail();
+                String name = (String) payload.get("name");
+
+                // Verificar si el usuario existe en la base de datos
+                UserEntity user = userRepository.findByEmail(email).orElseGet(() -> {
+                    // Crear un nuevo usuario si no existe
+                    UserEntity newUser = new UserEntity();
+                    newUser.setEmail(email);
+                    newUser.setName(name);
+                    return userRepository.save(newUser);
+                });
 
                 // Generar el JWT para tu backend
-                String accessToken = jwtService.generateToken(email);
+                String accessToken = jwtService.generateToken( user.getId(),email, name);
 
-                // Respuesta con el access token
-                return ResponseEntity.ok(new TokenResponse(accessToken));
+                // Respuesta con el access token y el ID del usuario
+                return ResponseEntity.ok(new TokenResponse( accessToken));
             } else {
                 return ResponseEntity.status(400).body("Invalid ID token.");
             }
