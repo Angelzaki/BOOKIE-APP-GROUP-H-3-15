@@ -1,5 +1,4 @@
 import 'package:bookieapp/ui/pages/editscreen.dart';
-import 'package:bookieapp/ui/pages/favouritesscreen.dart';
 import 'package:bookieapp/ui/pages/homescreen.dart';
 import 'package:bookieapp/ui/pages/libraryscreen.dart';
 import 'package:bookieapp/ui/pages/mapscreen.dart';
@@ -19,8 +18,7 @@ class _NavigatorState extends State<BottomTabsNavigatorState> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const LibraryScreen(),
-    MapScreen(),
-    const FavouritesScreen(),
+    MapScreen(),    
     const EditScreen(),
   ];
 
@@ -84,11 +82,7 @@ class _NavigatorState extends State<BottomTabsNavigatorState> {
                   BottomNavigationBarItem(
                     icon: Icon(Icons.location_on_outlined),
                     label: '',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.favorite_border),
-                    label: '',
-                  ),
+                  ),                  
                   BottomNavigationBarItem(
                     icon: Icon(Icons.mode_outlined),
                     label: '',
