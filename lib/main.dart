@@ -7,19 +7,19 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:bookieapp/ui/Navigator/bottomtabs.dart';
 import 'package:provider/provider.dart';
+ 
 
-  await init();
-  // runApp(const MyApp());
-  runApp(Provider(create: (_)=>MainStore(),child:const MyApp()));
+  
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   try {    
     await dotenv.load(fileName: ".env");    
   } catch (e) {
-    print("Error al cargar .env: $e");
+    print("Error al cargar .env: $e");  
   }
-
+  await init();
+  runApp(Provider(create: (_)=>MainStore(),child:const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
