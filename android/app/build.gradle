@@ -9,11 +9,7 @@ android {
     namespace = "com.example.bookieapp"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
-
-    buildFeatures{
-      buildConfig = true
-    }
-
+    
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -32,8 +28,7 @@ android {
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
-        versionName = flutter.versionName
-        buildConfigField "String", "API_KEY_GOOGLEMAPS", "\"${project.API_KEY_GOOGLEMAPS}\""
+        versionName = flutter.versionName        
     }
 
     buildTypes {
