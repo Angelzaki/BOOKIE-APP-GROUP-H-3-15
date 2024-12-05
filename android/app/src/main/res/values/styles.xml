@@ -14,8 +14,6 @@
          This Theme is only used starting with V2 of Flutter's Android embedding. -->
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">?android:colorBackground</item>
-    </style>
-    
-    <string name="google_maps_api_key">@BuildConfig.API_KEY_GOOGLEMAPS</string>
+    </style>    
 
 </resources>
