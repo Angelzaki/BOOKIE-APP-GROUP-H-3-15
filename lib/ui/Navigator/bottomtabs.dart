@@ -1,6 +1,7 @@
 import 'package:bookieapp/ui/pages/editscreen.dart';
 import 'package:bookieapp/ui/pages/homescreen.dart';
 import 'package:bookieapp/ui/pages/libraryscreen.dart';
+import 'package:bookieapp/ui/pages/loginscreen.dart';
 import 'package:bookieapp/ui/pages/mapscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
