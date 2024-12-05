@@ -24,7 +24,7 @@ class _MapScreenState extends State<MapScreen> {
   LatLng? _currentLocation;
   LatLng? _destination;
   GoogleMapController? _mapController;
-  List<Chapter> _chapters=[];
+  List<Chapter> _chapters = [];
   List<Marker> _markers = [];
   List<Polyline> _polylines = [];
   int _markerIdCounter = 1;
@@ -41,14 +41,14 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _loadChaptersAndAddMarkers() {
-  setState(() {
-    _chapters = chaptersData; // Asignar la lista fake a _chapters
-  });
+    setState(() {
+      _chapters = chaptersData; // Asignar la lista fake a _chapters
+    });
 
-  for (var chapter in _chapters) {
-    _addMarker(LatLng(chapter.latitude, chapter.longitude));
+    for (var chapter in _chapters) {
+      _addMarker(LatLng(chapter.latitude, chapter.longitude));
+    }
   }
-}
 
   void _initializeMapRenderer() {
     final GoogleMapsFlutterPlatform mapsImplementation =
@@ -120,7 +120,8 @@ class _MapScreenState extends State<MapScreen> {
 
       // Evitar redibujar la ruta si ya está borrada
       if (!_isRouteCleared && _destination != null) {
-        _drawRoute(_destination!);
+        // print("HOLA CHICOS2");
+        // _drawRoute(_destination!);
       }
 
       // if (_mapController != null) {
@@ -132,41 +133,52 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _addMarker(LatLng position) async {
-  final markerId = MarkerId('marker_${_markerIdCounter++}');
-  final customIcon = await createCustomMarker('lib/ui/assets/marker1.png');
+    final markerId = MarkerId('marker_${_markerIdCounter++}');
+    final customIcon = await createCustomMarker('lib/ui/assets/marker1.png');
 
-  final chapter = _chapters.firstWhere(
-    (ch) => ch.latitude == position.latitude && ch.longitude == position.longitude,
-    orElse: () => Chapter(
-      storyId: 0,
-      title: "Desconocido",
-      content: "",
-      latitude: position.latitude,
-      longitude: position.longitude,
-      numberChapter: 0,
-    ),
-  );
+    final chapter = _chapters.firstWhere(
+      (ch) =>
+          ch.latitude == position.latitude &&
+          ch.longitude == position.longitude,
+      orElse: () => Chapter(
+        storyId: 0,
+        title: "Desconocido",
+        content: "",
+        latitude: position.latitude,
+        longitude: position.longitude,
+        numberChapter: 0,
+      ),
+    );
 
-  final marker = Marker(
-    markerId: markerId,
-    position: position,
-    icon: customIcon,
-    onTap: () {
-      setState(() {
-        _destination = position;
-      });
-      _drawRoute(position);
-      openCustomModal(context, chapter.title, chapter.content,chapter.numberChapter,"https://mundosdepinceladas.net/wp-content/uploads/pintura-impresionante-paisaje-sereno-1.webp"); // Pasar información al modal
-    },
-  );
+    final marker = Marker(
+      markerId: markerId,
+      position: position,
+      icon: customIcon,
+      onTap: () {
+        setState(() {
+          _destination = position;
+        });
+        // _drawRoute(position);
+        openCustomModal(
+            context,
+            chapter.title,
+            chapter.content,
+            chapter.numberChapter,
+            "https://mundosdepinceladas.net/wp-content/uploads/pintura-impresionante-paisaje-sereno-1.webp",
+            () {
+              print("HOLA CHICOS3");
+          _drawRoute(position);
+        }, () => _clearRoute()); // Pasar información al modal
+      },
+    );
 
-  setState(() {
-    _markers.add(marker);
-  });
-}
-
+    setState(() {
+      _markers.add(marker);
+    });
+  }
 
   Future<void> _drawRoute(LatLng destination) async {
+    
     if (_currentLocation == null) return;
 
     final apiKey = dotenv.env['API_KEY'];
@@ -202,6 +214,11 @@ class _MapScreenState extends State<MapScreen> {
             ];
           });
         }
+        if (_currentLocation != null) {
+          _mapController!.animateCamera(
+            CameraUpdate.newLatLng(_currentLocation!),
+          );
+        }
       } else {
         print('Error en la solicitud: ${response.statusCode}');
       }
@@ -215,7 +232,8 @@ class _MapScreenState extends State<MapScreen> {
       _isRouteCleared = false; // Restablecer la bandera
     });
 
-    if (_destination != null) {
+    if (_destination != null) {      
+      print("HOLA CHICOS");
       _drawRoute(_destination!); // Redibujar la ruta con el destino actual
     }
   }
@@ -256,7 +274,13 @@ class _MapScreenState extends State<MapScreen> {
             bottom: 130.0,
             right: 16.0,
             child: GestureDetector(
-              onTap: () => showAddChapterModal(context, _chapters, _addMarker, setState,_currentLocation?.latitude??0, _currentLocation?.longitude??0),
+              onTap: () => showAddChapterModal(
+                  context,
+                  _chapters,
+                  _addMarker,
+                  setState,
+                  _currentLocation?.latitude ?? 0,
+                  _currentLocation?.longitude ?? 0),
               child: Container(
                 width: 40,
                 height: 40,
