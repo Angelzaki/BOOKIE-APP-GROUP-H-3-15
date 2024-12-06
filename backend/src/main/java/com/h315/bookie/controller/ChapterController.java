@@ -44,7 +44,7 @@ public class ChapterController {
             if (chapterRepository.findByStoryIdAndNumberchapter(story.getId(), chapterDto.numberchapter()).isPresent()) {
                 return ResponseEntity.status(400).body("El número del capítulo ya existe en esta historia.");
             }
-            // Crear el capítulo utilizando el patrón Builder
+            // Crear el capítulo
             ChapterEntity chapterEntity = ChapterEntity.builder()
                     .story(story)
                     .title(chapterDto.title())
