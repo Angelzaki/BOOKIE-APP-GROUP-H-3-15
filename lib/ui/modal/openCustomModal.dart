@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 
-void openCustomModal(BuildContext context, String title, String content,
-    int chapterNumber, String imageUrl) {
+void openCustomModal(
+    BuildContext context,
+    String title,
+    String content,
+    int chapterNumber,
+    String imageUrl,
+    VoidCallback onStartRoute,
+    VoidCallback onCancel) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -92,21 +98,24 @@ void openCustomModal(BuildContext context, String title, String content,
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              // Acción para comenzar el trayecto
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  Color(0xFF4261F9), // Color de fondo del botón
-                              foregroundColor: Colors
-                                  .white, // Color del texto (letra) en blanco
-                              textStyle: TextStyle(
-                                fontSize:
-                                    15, // Ajusta el tamaño de la letra aquí
+                          SizedBox(
+                            width: 280, // Establece el ancho del botón
+                            child: ElevatedButton(
+                              onPressed: () {                                
+                                onStartRoute();
+                                Navigator.pop(context); // Cierra el modal
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(
+                                    0xFF4261F9), // Color de fondo del botón
+                                foregroundColor:
+                                    Colors.white, // Color del texto
+                                textStyle: TextStyle(
+                                  fontSize: 15, // Ajusta el tamaño de la letra
+                                ),
                               ),
+                              child: Text("Comenzar Trayecto"),
                             ),
-                            child: Text("Comenzar Trayecto"),
                           ),
                         ],
                       ),
@@ -114,13 +123,23 @@ void openCustomModal(BuildContext context, String title, String content,
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: Text(
-                              "Cancelar",
-                              style: TextStyle(color: Colors.blue),
+                          SizedBox(
+                            width: 280, // Establece el ancho del botón
+                            child: TextButton(
+                              onPressed: () {
+                                onCancel();
+                                Navigator.pop(context);
+                              },
+                              style: TextButton.styleFrom(
+                                side: BorderSide(
+                                  color: Color(0xFF4261F9), // Color del borde
+                                  width: 1, // Ancho del borde
+                                ),
+                              ),
+                              child: Text(
+                                "Cancelar",
+                                style: TextStyle(color: Color(0xFF4261F9)),
+                              ),
                             ),
                           ),
                         ],
