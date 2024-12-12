@@ -1,7 +1,9 @@
 import 'package:bookieapp/app/app_routes.dart';
 import 'package:bookieapp/app/injection_container.dart';
+import 'package:bookieapp/domain/use_cases/get_all_stories.dart';
 import 'package:bookieapp/ui/pages/splashscreen.dart';
 import 'package:bookieapp/ui/store/main_store.dart';
+import 'package:bookieapp/ui/store/story/story_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -19,7 +21,18 @@ Future<void> main() async {
     print("Error al cargar .env: $e");  
   }
   await init();
-  runApp(Provider(create: (_)=>MainStore(),child:const MyApp()));
+  // runApp(Provider(create: (_)=>MainStore(),child:const MyApp()));
+  runApp(
+    MultiProvider(
+      providers: [
+        // Proporcionamos el MainStore que ya gestiona StoryStore
+        Provider(create: (_) => MainStore()),
+        // Aunque MainStore ya proporciona StoryStore, puedes también añadirlo directamente
+        Provider(create: (_) => StoryStore(main: MainStore(), getAllStories: sl<GetAllStories>())),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

@@ -18,7 +18,7 @@ class _NavigatorState extends State<BottomTabsNavigatorState> {
 
   final List<Widget> _screens = [
     const HomeScreen(),
-    const LibraryScreen(),
+    LibraryScreen(),
     MapScreen(),    
     const EditScreen(),
   ];
