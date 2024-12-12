@@ -80,7 +80,9 @@ flutter:
     - lib/ui/assets/marker1.png
     - lib/ui/assets/addMarker.png
     - lib/ui/assets/myUbication.png
-    - lib/ui/assets/book.png
+    - lib/ui/assets/book.png    
+    - lib/ui/assets/images/logo.jpeg    
+    - lib/ui/assets/images/image1.jpeg    
     - .env
 
     
